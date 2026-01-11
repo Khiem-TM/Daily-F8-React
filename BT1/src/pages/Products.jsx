@@ -97,11 +97,11 @@ const Products = () => {
       </div>
 
       {/* pagination */}
-      <div style={{ marginTop: '20px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <div style={{ marginTop: '20px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
         <button onClick={() => handlePageChange(page - 1)} disabled={page <= 1}>
           Prev
         </button>
-        {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map((p) => (
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
           <button
             key={p}
             onClick={() => handlePageChange(p)}
