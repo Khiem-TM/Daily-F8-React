@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../stores/authStore.js';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 
 const toSlug = (str) =>
   str
@@ -21,7 +20,8 @@ function useDebounce(value, delay) {
   return debouncedValue;
 }
 
-const Products = () => {
+const UserProducts = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const limit = 12;
 
@@ -66,13 +66,17 @@ const Products = () => {
     setSearchParams(params);
   };
 
-  const todoList = useAuth((state) => state.todoList || []);
+  const handleQuickOrder = (product) => {
+    if (confirm(`Đặt hàng nhanh: ${product.title}?`)) {
+      navigate(`/users/order/${product.id}`);
+    }
+  };
 
   return (
-    <div className="fade-in">
-      <div className="page-header">
-        <h1> Danh sách sản phẩm</h1>
-        <p>Khám phá {total} sản phẩm đa dạng và chất lượng</p>
+    <div className="user-page fade-in">
+      <div className="page-header" style={{ textAlign: 'left' }}>
+        <h1>🛍️ Danh sách sản phẩm</h1>
+        <p>Khám phá và đặt hàng {total} sản phẩm đa dạng</p>
       </div>
 
       <div className="search-container">
@@ -99,56 +103,70 @@ const Products = () => {
           <div className="loading-spinner"></div>
         </div>
       ) : (
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', 
-          gap: '1.5rem' 
-        }}>
+        <div className="user-products-grid">
           {products.map((item, index) => (
             <div 
               key={item.id} 
-              className="product-card fade-in"
+              className="user-product-card fade-in"
               style={{ animationDelay: `${index * 0.05}s` }}
             >
-              <div style={{ overflow: 'hidden', background: '#f8fafc' }}>
+              <div className="user-product-image">
                 <img src={item.thumbnail} alt={item.title} />
+                {item.discountPercentage > 10 && (
+                  <div className="product-discount-badge">
+                    -{Math.round(item.discountPercentage)}%
+                  </div>
+                )}
               </div>
-              <div className="product-card-content">
-                <h3 className="product-card-title">{item.title}</h3>
+              <div className="user-product-content">
+                <span className="badge badge-primary" style={{ fontSize: '0.7rem' }}>
+                  {item.category}
+                </span>
+                <h3 className="user-product-title">{item.title}</h3>
                 <div style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '0.5rem',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.75rem'
                 }}>
                   <span style={{ color: '#fbbf24' }}>★</span>
                   <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                     {item.rating}
                   </span>
-                  {item.discountPercentage > 10 && (
-                    <span className="badge badge-primary" style={{ marginLeft: 'auto' }}>
-                      -{Math.round(item.discountPercentage)}%
-                    </span>
-                  )}
+                  <span style={{ 
+                    marginLeft: 'auto',
+                    fontSize: '0.75rem',
+                    color: item.stock > 10 ? 'var(--success-color)' : 'var(--warning-color)',
+                    fontWeight: '600'
+                  }}>
+                    {item.stock > 10 ? '✓ Còn hàng' : '⚠ Sắp hết'}
+                  </span>
                 </div>
-                <p className="product-card-price">${item.price}</p>
-                <Link 
-                  to={`/products/${item.id}/${toSlug(item.title)}`}
-                  style={{
-                    display: 'inline-block',
-                    width: '100%',
-                    textAlign: 'center',
-                    padding: '0.75rem',
-                    background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                    color: 'white',
-                    borderRadius: 'var(--radius-md)',
-                    fontWeight: '600',
-                    fontSize: '0.9rem',
-                    transition: 'all var(--transition-normal)'
-                  }}
-                >
-                  Xem chi tiết →
-                </Link>
+                <p className="user-product-price">${item.price}</p>
+                <div className="user-product-actions">
+                  <Link 
+                    to={`/products/${item.id}/${toSlug(item.title)}`}
+                    className="btn-secondary"
+                    style={{ 
+                      textDecoration: 'none',
+                      textAlign: 'center',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    📄 Chi tiết
+                  </Link>
+                  <button
+                    onClick={() => handleQuickOrder(item)}
+                    className="btn-primary"
+                    style={{ 
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    🛒 Đặt ngay
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -160,54 +178,42 @@ const Products = () => {
           <button 
             onClick={() => handlePageChange(page - 1)} 
             disabled={page <= 1}
-            style={{ background: page <= 1 ? '#e2e8f0' : '' }}
           >
             ← Trước
           </button>
           
-          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-            let pageNum;
-            if (totalPages <= 7) {
-              pageNum = i + 1;
-            } else if (page <= 4) {
-              pageNum = i + 1;
-            } else if (page >= totalPages - 3) {
-              pageNum = totalPages - 6 + i;
-            } else {
-              pageNum = page - 3 + i;
+          {[...Array(totalPages)].map((_, i) => {
+            const pageNum = i + 1;
+            if (
+              pageNum === 1 ||
+              pageNum === totalPages ||
+              (pageNum >= page - 1 && pageNum <= page + 1)
+            ) {
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={page === pageNum ? 'active' : ''}
+                >
+                  {pageNum}
+                </button>
+              );
+            } else if (pageNum === page - 2 || pageNum === page + 2) {
+              return <span key={pageNum}>...</span>;
             }
-            return pageNum;
-          }).map((p) => (
-            <button
-              key={p}
-              onClick={() => handlePageChange(p)}
-              className={p === page ? 'active' : ''}
-            >
-              {p}
-            </button>
-          ))}
-          
+            return null;
+          })}
+
           <button 
             onClick={() => handlePageChange(page + 1)} 
             disabled={page >= totalPages}
-            style={{ background: page >= totalPages ? '#e2e8f0' : '' }}
           >
             Sau →
           </button>
         </div>
       )}
-      <h2>Todolist</h2>
-      {todoList.length === 0 ? (
-        <p style={{ color: 'var(--text-secondary)' }}>Chưa có dữ liệu todo.</p>
-      ) : (
-        todoList.map((todo) => (
-          <h3 key={todo.id}>
-            {todo.title}
-          </h3>
-        ))
-      )}
     </div>
   );
 };
 
-export default Products;
+export default UserProducts;
