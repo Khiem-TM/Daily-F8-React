@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* CSS Variables for theme */
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #121212;
+  --bg-tertiary: #262626;
+  --bg-elevated: #363636;
+  --text-primary: #ffffff;
+  --text-secondary: #a8a8a8;
+  --text-tertiary: #737373;
+  --border-color: #262626;
+  --accent-color: #0095f6;
+}
+
+/* Light mode variables */
+:root.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #efefef;
+  --bg-elevated: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #737373;
+  --text-tertiary: #8e8e8e;
+  --border-color: #dbdbdb;
+  --accent-color: #0095f6;
+}
+
+/* Reset cơ bản để full màn hình */
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Tránh thanh cuộn ngang nếu có */
+}
+
+/* Apply theme colors */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme-aware component styles */
+.light .bg-black {
+  background-color: var(--bg-primary) !important;
+}
+
+.light .bg-\[\#121212\] {
+  background-color: var(--bg-secondary) !important;
+}
+
+.light .bg-\[\#262626\] {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.light .bg-\[\#363636\] {
+  background-color: var(--bg-elevated) !important;
+}
+
+.light .text-white {
+  color: var(--text-primary) !important;
+}
+
+.light .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+.light .text-gray-500 {
+  color: var(--text-tertiary) !important;
+}
+
+.light .border-gray-700,
+.light .border-gray-800 {
+  border-color: var(--border-color) !important;
+}
+
+.light .border-\[\#262626\] {
+  border-color: var(--border-color) !important;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
