@@ -44,7 +44,6 @@ export default function AppRoutes() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:userId" element={<ProfilePage />} />
 
-          {/* Settings Routes with nested children */}
           <Route path="/settings" element={<SettingsPage />}>
             <Route index element={<EditProfileSection />} />
             <Route path="notifications" element={<NotificationsSection />} />
@@ -60,9 +59,6 @@ export default function AppRoutes() {
               element={<MessagesSection />}
             />
           </Route>
-
-          {/* Thêm các route khác ở đây */}
-          {/* <Route path="/p/:postId" element={<PostDetailPage />} /> */}
         </Route>
       </Routes>
     </BrowserRouter>

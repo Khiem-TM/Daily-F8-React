@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Settings, Loader2, Plus, AtSign } from "lucide-react";
-import { getUserById, getCurrentUserProfile } from "@/apis/user.api";
+import { getUserById } from "@/apis/user.api";
 import { useAuthStore } from "@/store/auth.store";
 import { getAvatarUrl, getFallbackAvatarUrl } from "@/utils/avatar";
 import ProfileStats from "../components/ProfileStats";
@@ -18,26 +18,24 @@ export default function ProfilePage() {
   const { user: currentUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>("posts");
 
-  // Determine if viewing own profile
+  // Determine which user ID to fetch
+  const targetUserId = userId || currentUser?._id;
   const isOwnProfile = !userId || userId === currentUser?._id;
 
-  // Fetch profile data based on userId param
   const {
     data: profile,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["user-profile", userId ?? currentUser?._id ?? "me"],
+    queryKey: ["user-profile", targetUserId],
     queryFn: async () => {
-      // If no userId in URL or userId matches currentUser, fetch current user profile
-      if (!userId || userId === currentUser?._id) {
-        return getCurrentUserProfile();
-      }
-      return getUserById(userId);
+      if (!targetUserId) return null;
+      const userData = await getUserById(targetUserId);
+      return userData;
     },
-    enabled: !!currentUser,
+    enabled: !!currentUser && !!targetUserId,
     staleTime: 0,
-    refetchOnMount: true,
+    refetchOnMount: "always",
   });
 
   if (isLoading) {

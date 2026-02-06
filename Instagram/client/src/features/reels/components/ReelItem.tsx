@@ -37,12 +37,10 @@ export default function ReelItem({
   const [volume, setVolume] = useState(1);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
-  // Enrich user data with profilePicture if missing
   const enrichedUser = useEnrichedUser(post.user) || post.user;
   const currentUser = useAuthStore((state) => state.user);
   const isOwnPost = currentUser?._id === enrichedUser?._id;
 
-  // Follow status
   const { isFollowing: apiIsFollowing, isLoading: isLoadingFollow } =
     useFollowStatus(isOwnPost ? "" : enrichedUser?._id || "");
   const [isFollowing, setIsFollowing] = useState(false);
@@ -54,28 +52,23 @@ export default function ReelItem({
     }
   }, [apiIsFollowing, isLoadingFollow]);
 
-  // Check if we already have like status from post data
   const hasLikeStatus =
     post.isLiked !== undefined || post.isLikedByCurrentUser !== undefined;
 
-  // Only fetch from API if post data doesn't have status
   const { isLiked: apiIsLiked, isLoading: isLoadingStatus } = useLikeStatus(
     hasLikeStatus ? "" : post._id
   );
-  // Initialize from post data (API returns isLiked, legacy uses isLikedByCurrentUser)
   const [isLiked, setIsLiked] = useState(
     post.isLiked ?? post.isLikedByCurrentUser ?? false
   );
   const { like, unlike } = usePostLike(post._id);
 
-  // Only sync with API data if we didn't have status from post
   useEffect(() => {
     if (!hasLikeStatus && !isLoadingStatus) {
       setIsLiked(apiIsLiked);
     }
   }, [hasLikeStatus, apiIsLiked, isLoadingStatus]);
 
-  // Auto-play/pause based on isActive
   useEffect(() => {
     if (videoRef.current) {
       if (isActive && !isPaused) {

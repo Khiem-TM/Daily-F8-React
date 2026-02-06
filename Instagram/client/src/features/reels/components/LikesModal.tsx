@@ -10,13 +10,12 @@ interface LikesModalProps {
 export default function LikesModal({ post, isOpen, onClose }: LikesModalProps) {
   if (!isOpen) return null;
 
-  // Mock data - will be replaced with real API later
   const mockLikes = [
     {
       _id: "1",
-      username: post.user?.username || "user1",
-      fullName: post.user?.fullName || "User One",
-      profilePicture: post.user?.profilePicture || "/default-avatar.png",
+      username: "user1",
+      fullName: "User One",
+      profilePicture: "/avatar.png",
       isFollowing: false,
     },
   ];

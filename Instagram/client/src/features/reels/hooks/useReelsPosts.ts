@@ -6,9 +6,7 @@ export const useReelsPosts = () => {
   return useQuery<Post[]>({
     queryKey: ["reels"],
     queryFn: async () => {
-      // Get a large batch of posts to filter for reels
       const response = await getFeedPosts(100, 0);
-      // Filter only video posts
       return response.posts.filter(
         (post: Post) => post.mediaType === "video" && post.video
       );
