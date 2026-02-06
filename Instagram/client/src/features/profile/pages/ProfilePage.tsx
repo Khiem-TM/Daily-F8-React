@@ -18,25 +18,27 @@ export default function ProfilePage() {
   const { user: currentUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>("posts");
 
+  // Determine if viewing own profile
+  const isOwnProfile = !userId || userId === currentUser?._id;
+
   // Fetch profile data based on userId param
   const {
     data: profile,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["user-profile", userId ?? "me"],
+    queryKey: ["user-profile", userId ?? currentUser?._id ?? "me"],
     queryFn: async () => {
-      if (!userId) {
+      // If no userId in URL or userId matches currentUser, fetch current user profile
+      if (!userId || userId === currentUser?._id) {
         return getCurrentUserProfile();
       }
       return getUserById(userId);
     },
     enabled: !!currentUser,
     staleTime: 0,
+    refetchOnMount: true,
   });
-
-  // Determine if viewing own profile AFTER we have the profile data
-  const isOwnProfile = !userId || profile?._id === currentUser?._id;
 
   if (isLoading) {
     return (

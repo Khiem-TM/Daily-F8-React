@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/auth.store";
 // instance axios với default config
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.DEV ? "/api" : "https://instagram.f8team.dev/api",
-  withCredentials: false, // Disable credentials to avoid CORS issues with wildcard origin
+  withCredentials: false, 
 });
 
 let isRefreshing = false;

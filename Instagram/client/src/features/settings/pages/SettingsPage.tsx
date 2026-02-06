@@ -12,7 +12,6 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-// Settings menu structure with groups
 const settingsGroups = [
   {
     title: "Cách bạn dùng Instagram",

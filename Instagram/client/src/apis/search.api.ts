@@ -13,12 +13,10 @@ export const addSearchHistory = async (
   data: AddSearchHistoryRequest
 ): Promise<AddSearchHistoryResponse> => {
   if (!data.searchedUserId && !data.searchQuery?.trim()) {
-    console.error("Api error");
-    throw new Error("searchQuery error");
+    throw new Error("Either searchedUserId or searchQuery is required");
   }
 
   if (data.searchedUserId && !isValidMongoId(data.searchedUserId)) {
-    console.error("Api error:", data.searchedUserId);
     throw new Error("Invalid user ID format");
   }
 
@@ -32,37 +30,22 @@ export const addSearchHistory = async (
     requestBody.searchQuery = data.searchQuery.trim();
   }
 
-  console.log("Api error", requestBody);
-
-  try {
-    const response = await axiosInstance.post<AddSearchHistoryResponse>(
-      "/search-history",
-      requestBody
-    );
-    console.log("Api error", response.data);
-    return response.data;
-  } catch (error: any) {
-    console.error("Api error:", {
-      message: error.message,
-      responseData: error.response?.data,
-      status: error.response?.status,
-      requestBody,
-    });
-    throw error;
-  }
+  const response = await axiosInstance.post<AddSearchHistoryResponse>(
+    "/search-history",
+    requestBody
+  );
+  return response.data;
 };
 
 export const getSearchHistory = async (
   limit: number = 20
 ): Promise<SearchHistoryResponse> => {
-  console.log("Api error", limit);
   const response = await axiosInstance.get<SearchHistoryResponse>(
     "/search-history",
     {
       params: { limit },
     }
   );
-  console.log("Api error", response.data);
   return response.data;
 };
 

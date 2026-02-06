@@ -28,18 +28,11 @@ export default function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
   // Get search history
   const { data: searchHistoryData } = useQuery({
     queryKey: ["search-history"],
-    queryFn: async () => {
-      console.log("📋 Fetching search history...");
-      const result = await getSearchHistory(20);
-      console.log("📋 Search history loaded:", result);
-      return result;
-    },
+    queryFn: () => getSearchHistory(20),
     enabled: isOpen,
   });
 
   const searchHistory = searchHistoryData?.data || [];
-
-  console.log("🔍 Current search history items:", searchHistory.length);
 
   // Search users
   const { data: searchResults, isLoading } = useQuery({
@@ -87,40 +80,17 @@ export default function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
 
   // Handle user click - save to history and navigate
   const handleUserClick = async (userId: string, e: React.MouseEvent) => {
-    // Prevent default navigation to handle it manually after saving
     e.preventDefault();
 
-    console.log(
-      "🔍 Saving user to search history:",
-      userId,
-      "with query:",
-      searchQuery
-    );
-
-    // Build request data - only include fields that have values
-    const requestData: { searchedUserId: string; searchQuery?: string } = {
-      searchedUserId: userId,
-    };
-
-    // Only add searchQuery if it has a non-empty value
-    if (searchQuery.trim()) {
-      requestData.searchQuery = searchQuery.trim();
-    }
-
+    // Only send searchedUserId - don't include searchQuery for user clicks
     try {
-      // Save to history first
-      await addHistoryMutation.mutateAsync(requestData);
-      console.log("✅ Search history saved successfully");
-    } catch (error: any) {
-      // Log detailed error but don't block navigation
-      console.error("❌ Failed to save to search history:", {
-        error: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        requestData,
+      await addHistoryMutation.mutateAsync({
+        searchedUserId: userId,
       });
+    } catch (error: any) {
+      console.error("Failed to save search history:", error.response?.data);
     }
-    // Close sidebar and navigate regardless of save success
+
     onClose();
     navigate(`/profile/${userId}`);
   };
